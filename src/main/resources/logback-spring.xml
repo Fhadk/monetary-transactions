@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <include resource="das-logback-spring.xml"/>
+
+    <springProfile name="logstash">
+        <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <destination>logstash-logstash.log.svc.cluster.local:4560</destination>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"application": "ewallet"}</customFields>
+            </encoder>
+        </appender>
+
+        <logger name="ROOT" level="INFO">
+            <appender-ref ref="stash" />
+        </logger>
+
+        <logger name="com.letshego" level="DEBUG">
+        </logger>
+
+        <logger name="org.zalando.logbook" level="TRACE">
+        </logger>
+
+    </springProfile>
+
+</configuration>

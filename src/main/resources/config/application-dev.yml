@@ -1,0 +1,197 @@
+rest:
+  api-key: x32jcsHA3240SSdfdk
+  api-key-kong: 3dwMNSX0qPp8rMJmSXfe5Rz98nSal6Jb
+  api-version: v3
+
+spring:
+  datasource:
+    url: jdbc:h2:file:./target/h2db/db/payment-transaction
+    username: loan
+    password: loan
+    driver-class-name: org.h2.Driver
+    platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+  jpa:
+    show-sql: false
+
+service:
+  kong-api-gateway:
+    url: http://api-dev.letshego.com:8000/
+  notification-service:
+    url: http://localhost:8080
+  ewallet-account-management:
+    url: http://localhost:7273
+  gh-merchant-client:
+    url: http://api-dev.letshego.com:8000/
+  letshego-gateway:
+    url: http://api-dev.letshego.com:8000/
+
+
+registration:
+  ribbon:
+    listOfServers: localhost:7005
+
+mobifin:
+  config:
+    ghana:
+      mobifin-auth-token: QUNDRVNTX0NIQU5ORUxfR0hBTkE6Y2xpZW50QGdoYW5hIzEyMw==
+      mobifin-username: DigitalMallGhanaAPIClient
+      mobifin-password: DigitalMallGhanaAPIClient
+    namibia:
+      mobifin-auth-token: QUNDRVNTX0NIQU5ORUxfTkFNSUJJQTpjbGllbnRAbmFtaWJpYSMxMjM=
+      mobifin-username: DigitalMallNamibiaAPIClient
+      mobifin-password: DigitalMallNamibiaAPIClient
+
+aws:
+  sns:
+    payment-status:
+      topic: arn:aws:sns:eu-west-1:116201929255:payment-status
+
+vas:
+  service:
+    ghana:
+      Broadband: BROADBAND
+      Postpaid: POSTPAID
+  utility:
+    ghana:
+      VAS_AIRTIME: airtime
+      VAS_ELECTRICITY: powerbill
+      VAS_WATER: waterbill
+      VAS_MOBILE_TOPUP: airtime
+      VAS_INTERNET: data4g
+      VAS_BILL_PAYMENT: tvbills
+
+    namibia:
+      VAS_AIRTIME: netpayments
+      VAS_ELECTRICITY: electricity
+      VAS_WATER: netpayments
+      VAS_MOBILE_TOPUP: netpayments
+      VAS_INTERNET: netpayments
+      VAS_BILL_PAYMENT: netpayments
+  productId:
+    ghana:
+      tvbills:
+        DSTV: DSTV_GHANA
+        GOTV: GOTV_BILLS_GHANA
+        LICENSE: LICENSE_TV_BILLS_GHANA
+      airtime:
+        MTN: MTN_AIRTIME_GHANA
+        VODAFONE: VODAFONE_AIRTIME_GHANA
+        EXPRESSO: EXPRESSO_AIRTIME_GHANA
+        AIRTELTIGO: AIRTELTIGO_AIRTIME_GHANA
+        GLO: GLO_AIRTIME_GHANA
+      waterbill:
+        WATER: WATER_UTILITY_GHANA
+      data4g:
+        SURFLINE: SURFLINE_DATA_GHANA
+        BUSY: BUSY_DATA_GHANA
+        AIRTEL: AIRTEL_DATA_GHANA
+        TIGO: TIGO_DATA_GHANA
+        MTN: MTN_DATA_GHANA
+        VODAPHONE: VODAFONE_DATA_GHANA
+      powerbill:
+        ECG: ECG_UTILITY_GHANA
+    namibia:
+      electricity:
+        WHK: CITY_OF_WINDHOEK_NAMIBIA
+        ERG: ERONGO_RED_NAMIBIA
+        CEN: CENORED_NAMIBIA
+        NOR: NORED_NAMIBIA
+        RHB: REHOBOTH_NAMIBIA
+        OPE: OSHAKATI_PREMIER_ELECTRIC_NAMIBIA
+        LDR: LUDERITZ_NAMIBIA
+        OKH: OKAHANDJA_NAMIBIA
+        KET: KEETMANSHOOP_NAMIBIA
+        ORA: ORANJEMUND_NAMIBIA
+        ARANOS: ARANOS_NAMIBIA
+        GIBEON: GIBEON_NAMIBIA
+        GOBMUN: GOBABIS_NAMIBIA
+        MARIEN: MARIENTAL_NAMIBIA
+        NAMPOW: NAMPOWER_NAMIBIA
+        OSONA: OSONA_VILLAGE_NAMIBIA
+        OMEYA: OMEYA_GOLF_ESTATE_NAMIBIA
+        FIN: FINKENSTEIN_NAMIBIA
+        MPG: OTJOMUISE_LIFESTYLE_VILLAGE_NAMIBIA
+        WITVLEI: WITVLEI_NAMIBIA
+      netpayments:
+        NAMWATER: WHKWATER_NAMIBIA
+        LDRWATER: LDRWATER_NAMIBIA
+        OTJIWATER: OTJIWATER_NAMIBIA
+        OSONAWATER: OSONAWATER_NAMIBIA
+        GOBABISWATER: GOBABISWATER_NAMIBIA
+        DSTVMW: DSTV_NAMIBIA
+        GOTVMW: GOTV_NAMIBIA
+        DSTVBOXMW: DSTVBOX_NAMIBIA
+        TELIO: TELIO_NAMIBIA
+        BONLIFE: BONLIFE_ASSURANCE_NAMIBIA
+        OLUSHENO: OLUSHENO_NAMIBIA
+        INTERCAPE: INTERCAPE–PAYMENTS_NAMIBIA
+        MTC: MTC_NAMIBIA
+        AW: AWEH_VOUCHERS_NAMIBIA
+        MTC5: MTC_NAMIBIA
+        MTC10: MTC_NAMIBIA
+        MTC20: MTC_NAMIBIA
+        MTC30: MTC_NAMIBIA
+        MTC50: MTC_NAMIBIA
+        MTC100: MTC_NAMIBIA
+        MTC150: MTC_NAMIBIA
+        MTC180: MTC_NAMIBIA
+        MTC295: MTC_NAMIBIA
+        AwehGig: AWEH_VOUCHERS_NAMIBIA
+        AwehGo: AWEH_VOUCHERS_NAMIBIA
+        AwehPrime: AWEH_VOUCHERS_NAMIBIA
+        AwehSuper: AWEH_VOUCHERS_NAMIBIA
+        MTCINV: MTC_INVOICE_PAYMENTS_NAMIBIA
+        MTCDT: MTC_DIRECT_TOP-UP_AIRTIME_NAMIBIA
+        MTCDATA: MTC_DIRECT-TOP_DATA_BUNDLES_NAMIBIA
+        TNMOBILE: TN_MOBILE_NAMIBIA
+        LEO: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO5: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO10: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO20: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO30: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO50: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO100: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+
+
+server:
+  port: 8283
+
+wallet:
+  status: down
+
+callback:
+  env: https://das-api.uat.letshego.com/api/payment/transaction/status/callback
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

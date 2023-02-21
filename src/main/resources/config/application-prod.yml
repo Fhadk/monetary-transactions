@@ -1,0 +1,12 @@
+server:
+  port: 7005
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+  h2:
+    console:
+      enabled: false
+  jpa:
+    show-sql: false
+

@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: notification-service
+  profiles:
+    active: dev
+
+  liquibase:
+    change-log: classpath:/config/liquibase/master.xml
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: [ 'configprops', 'env', 'health', 'info', 'jhimetrics', 'logfile', 'loggers', 'prometheus', 'threaddump' ]
+
+
+feign:
+  httpclient:
+    enabled: false
+    disable-ssl-validation: true
+  okhttp:
+    enabled: true
+    disable-ssl-validation: true
+
+wicode:
+  account-number: 20810287565
+
+transaction:
+  definition:
+    id: 2
+
+aws:
+  region: eu-west-1
+
+mobifin-mapping:
+  errors:
+    122001: Wallet balance max limit exceeded
+    122004: The maximum annual transaction limit has been reached
+    122003: The maximum monthly transaction limit has been reached
+    122002: The maximum daily transaction limit has been reached
+    122008: Balance not sufficient for PouchExId EMONEY_1
+    140005: Transaction value too low
+
+payment:
+  config:
+    namibia:
+      currencyCode: NAD
+      transaction:
+        limit:
+          bank_account-wallet: 10000
+          wallet-bank_account: 5000
+          wallet-wallet: 5000
+      monthly:
+        limit:
+          bank_account-wallet: 10000
+          wallet-bank_account: 5000
+          wallet-wallet: 5000
+    ghana:
+      currencyCode: GHS
+      transaction:
+        limit:
+          bank_account-wallet: 10000
+          wallet-bank_account: 5000
+          wallet-wallet: 10000
+      monthly:
+        limit:
+          bank_account-wallet: 10000
+          wallet-bank_account: 5000
+          wallet-wallet: 5000
+
+wallet:
+  status: down
+
+callback:
+  env: https://das-api.uat.letshego.com/api/payment/transaction/status/callback

@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-transactions-v3
+  namespace: das-ms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-transactions
+      version: 'v3'
+  template:
+    metadata:
+      labels:
+        app: payment-transactions
+        version: 'v3'
+    spec:
+      serviceAccountName: payment-transactions-ms
+      automountServiceAccountToken: false
+      containers:
+        - name: payment-transactions-app
+          image: 424462704852.dkr.ecr.eu-west-1.amazonaws.com/letshego-micro/payment-transactions:${deploy_version}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod,logstash
+            - name: SPRING_SLEUTH_PROPAGATION_KEYS
+              value: 'x-request-id,x-ot-span-context'
+            - name: JAVA_OPTS
+              value: ' -Xmx1024m -Xms512m'
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_SECRETS
+              value: 'das-ms-common, payment-transactions'
+            - name: AWS_SECRETS_REGION
+              value: 'eu-west-1'
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '250m'
+            limits:
+              memory: '1Gi'
+              cpu: '500m'
+          ports:
+            - name: http
+              containerPort: 7005
+          readinessProbe:
+            httpGet:
+              path: /management/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /management/health
+              port: http
+            initialDelaySeconds: 120
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-transactions
+  namespace: das-ms
+  labels:
+    app: payment-transactions
+spec:
+  selector:
+    app: payment-transactions
+  ports:
+    - name: http
+      port: 80
+      targetPort: 7005

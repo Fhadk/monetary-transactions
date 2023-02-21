@@ -1,0 +1,289 @@
+spring:
+  application:
+    name: payment-transactions
+  profiles:
+    active: dev
+  liquibase:
+    change-log: classpath:/config/liquibase/master.xml
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+management:
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: [ 'configprops', 'env', 'health', 'info', 'jhimetrics', 'logfile', 'loggers', 'prometheus', 'threaddump' ]
+
+feign:
+  httpclient:
+    enabled: false
+    disable-ssl-validation: true
+  okhttp:
+    enabled: true
+    disable-ssl-validation: true
+  client:
+    config:
+      mobifin-client:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        loggerLevel: basic
+        defaultRequestHeaders:
+          apikey: ${rest.api-key-kong}
+      kong-client:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        loggerLevel: basic
+        defaultRequestHeaders:
+          apikey: ${rest.api-key-kong}
+      kong-client-monetary:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        loggerLevel: FULL
+        defaultRequestHeaders:
+          apikey: ${rest.api-key-kong}
+      merchant-client:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        loggerLevel: FULL
+        defaultRequestHeaders:
+          apikey: ${rest.api-key-kong}
+          x-api-key: ${rest.api-key-kong}
+        requestInterceptors:
+          - com.letshego.das.payment.support.BuddyClientInterceptor
+      gh-merchant-client:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        loggerLevel: FULL
+        defaultRequestHeaders:
+          apikey: ${rest.api-key-kong}
+      cbs-client:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        loggerLevel: FULL
+        defaultRequestHeaders:
+          apikey: ${rest.api-key-kong}
+          x-api-key: ${rest.api-key-kong}
+        requestInterceptors:
+          - com.letshego.das.payment.support.BuddyClientInterceptor
+      ruby-client:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        loggerLevel: basic
+        defaultRequestHeaders:
+          apikey: ${rest.api-key-kong}
+          Authorization: ${rest.auth-key-ruby}
+      hubtel-vas-client:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        loggerLevel: basic
+        defaultRequestHeaders:
+          apikey: ${rest.api-key-kong}
+          x-country: Ghana
+          x-service: utility
+          x-method: purchase-vas
+          Content-Type: application/json
+      namibia-eft-client:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        loggerLevel: FULL
+        defaultRequestHeaders:
+          apikey: ${rest.api-key-kong}
+      E-Wallet-client:
+        connectTimeout: 6000000
+        readTimeout: 5000000
+        defaultRequestHeaders:
+          x-api-key: ${rest.api-key}
+          x-api-version: ${rest.api-version}
+aws:
+  region: eu-west-1
+
+
+logbook:
+  include: #include only cretain URLs (if defined), defaultValue=[]
+    - /**
+  exclude: #exclude cretain URLs (overrides logbook.include), defaultValue=[]
+    - /management/**
+  filter.enabled: true #enable the Logbook filter, defaultValue=true
+  format.style: json #Formatting style (http, json, curl or splunk), defaultValue=json
+  strategy: default #Strategy (default, status-at-least, body-only-if-status-at-least, without-body), defaultValue=default
+  minimum-status: 100 #Minimum status to enable logging (status-at-least and body-only-if-status-at-least), defaultValue=400
+  obfuscate: #List of header, parameter, and path names that need obfuscation
+    headers:
+      - Authorization
+      - x-api-key
+      - x-cognito-id-token
+      - x-jwt-auth
+    parameters:
+      - password
+
+
+
+payment:
+  config:
+    namibia:
+      currencyCode: NAD
+      transaction:
+        limit:
+          bank_account-wallet: 10000
+          wallet-bank_account: 5000
+          wallet-wallet: 5000
+      monthly:
+        limit:
+          bank_account-wallet: 10000
+          wallet-bank_account: 5000
+          wallet-wallet: 5000
+    ghana:
+      currencyCode: GHS
+      transaction:
+        limit:
+          bank_account-wallet: 10000
+          wallet-bank_account: 5000
+          wallet-wallet: 10000
+      monthly:
+        limit:
+          bank_account-wallet: 10000
+          wallet-bank_account: 5000
+          wallet-wallet: 5000
+
+mobifin-mapping:
+  errors:
+    122001: Wallet balance max limit exceeded
+    122004: The maximum annual transaction limit has been reached
+    122003: The maximum monthly transaction limit has been reached
+    122002: The maximum daily transaction limit has been reached
+    122008: Balance not sufficient for PouchExId EMONEY_1
+    140005: Transaction value too low
+vas:
+  service:
+    ghana:
+      Broadband: BROADBAND
+      Postpaid: POSTPAID
+  utility:
+    ghana:
+      VAS_AIRTIME: airtime
+      VAS_ELECTRICITY: powerbill
+      VAS_WATER: waterbill
+      VAS_MOBILE_TOPUP: airtime
+      VAS_INTERNET: databundle #data4g
+      VAS_BILL_PAYMENT: tvbills
+      VAS_VOICE_BUNDLE: voicebundle
+      VAS_DATA_BUNDLE: databundle
+    namibia:
+      VAS_AIRTIME: netpayments
+      VAS_ELECTRICITY: electricity
+      VAS_WATER: netpayments
+      VAS_MOBILE_TOPUP: netpayments
+      VAS_INTERNET: netpayments
+      VAS_BILL_PAYMENT: netpayments
+  productId:
+    ghana:
+      tvbills:
+        DSTV: DSTV_GHANA
+        GOTV: GOTV_BILLS_GHANA
+        LICENSE: LICENSE_TV_BILLS_GHANA
+      airtime:
+        MTN: MTN_AIRTIME_GHANA
+        VODAFONE: VODAFONE_AIRTIME_GHANA
+        EXPRESSO: EXPRESSO_AIRTIME_GHANA
+        AIRTELTIGO: AIRTELTIGO_AIRTIME_GHANA
+        GLO: GLO_AIRTIME_GHANA
+      waterbill:
+        WATER: WATER_UTILITY_GHANA
+      data4g:
+        SURFLINE: SURFLINE_DATA_GHANA
+        BUSY: BUSY_DATA_GHANA
+        AIRTELTIGO: AIRTELTIGO_AIRTIME_GHANA
+        AIRTEL: AIRTEL_DATA_GHANA
+        TIGO: TIGO_DATA_GHANA
+        MTN: MTN_DATA_GHANA
+        VODAFONE: VODAFONE_INTERNET_GHANA
+      powerbill:
+        ECG: ECG_UTILITY_GHANA
+    namibia:
+      electricity:
+        WHK: CITY_OF_WINDHOEK_NAMIBIA
+        ERG: ERONGO_RED_NAMIBIA
+        CEN: CENORED_NAMIBIA
+        NOR: NORED_NAMIBIA
+        RHB: REHOBOTH_NAMIBIA
+        OPE: OSHAKATI_PREMIER_ELECTRIC_NAMIBIA
+        LDR: LUDERITZ_NAMIBIA
+        OKH: OKAHANDJA_NAMIBIA
+        KET: KEETMANSHOOP_NAMIBIA
+        ORA: ORANJEMUND_NAMIBIA
+        ARANOS: ARANOS_NAMIBIA
+        GIBEON: GIBEON_NAMIBIA
+        GOBMUN: GOBABIS_NAMIBIA
+        MARIEN: MARIENTAL_NAMIBIA
+        NAMPOW: NAMPOWER_NAMIBIA
+        OSONA: OSONA_VILLAGE_NAMIBIA
+        OMEYA: OMEYA_GOLF_ESTATE_NAMIBIA
+        FIN: FINKENSTEIN_NAMIBIA
+        MPG: OTJOMUISE_LIFESTYLE_VILLAGE_NAMIBIA
+        WITVLEI: WITVLEI_NAMIBIA
+      netpayments:
+        NAMWATER: WHKWATER_NAMIBIA
+        LDRWATER: LDRWATER_NAMIBIA
+        OTJIWATER: OTJIWATER_NAMIBIA
+        OSONAWATER: OSONAWATER_NAMIBIA
+        GOBABISWATER: GOBABISWATER_NAMIBIA
+        DSTVMW: DSTV_NAMIBIA
+        GOTVMW: GOTV_NAMIBIA
+        DSTVBOXMW: DSTVBOX_NAMIBIA
+        TELIO: TELIO_NAMIBIA
+        BONLIFE: BONLIFE_ASSURANCE_NAMIBIA
+        OLUSHENO: OLUSHENO_NAMIBIA
+        INTERCAPE: INTERCAPE–PAYMENTS_NAMIBIA
+        MTC: MTC_NAMIBIA
+        AW: AWEH_VOUCHERS_NAMIBIA
+        MTC5: MTC_NAMIBIA
+        MTC10: MTC_NAMIBIA
+        MTC20: MTC_NAMIBIA
+        MTC30: MTC_NAMIBIA
+        MTC50: MTC_NAMIBIA
+        MTC100: MTC_NAMIBIA
+        MTC150: MTC_NAMIBIA
+        MTC180: MTC_NAMIBIA
+        MTC295: MTC_NAMIBIA
+        AwehGig: AWEH_VOUCHERS_NAMIBIA
+        AwehGo: AWEH_VOUCHERS_NAMIBIA
+        AwehPrime: AWEH_VOUCHERS_NAMIBIA
+        AwehSuper: AWEH_VOUCHERS_NAMIBIA
+        MTCINV: MTC_INVOICE_PAYMENTS_NAMIBIA
+        MTCDT: MTC_DIRECT_TOP-UP_AIRTIME_NAMIBIA
+        MTCDATA: MTC_DIRECT-TOP_DATA_BUNDLES_NAMIBIA
+        TNMOBILE: TN_MOBILE_NAMIBIA
+        LEO: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO5: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO10: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO20: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO30: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO50: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+        LEO100: TN_DIRECT-TOP_AIRTIME_NAMIBIA
+
+notification:
+  template:
+    token-delivery:
+      sms: >
+         Dear customer, your prepaid electricity purchase has been processed. Amount: N${0} Meter Number: {1} Units: {2} Token: {3}
+    internal-wallet-in-app:
+      sender-sms: You have successful sent {0} {1} to {2}.
+      receiver-sms: You have received {0} {1} from {2}.
+      push: You have received {0} {1} from {2}.
+      ghana: Your {0} has been {1} on {2} with {3} {4} {5}.Available balance {6}.
+      namibia: Your {0} has been {1} on {2} with {3} {4} {5}.Available balance {6}.
+      nigeria: Your {0} has been {1} on {2} with {3} {4} {5}.Available balance {6}.
+      mozambique: Your {0} has been {1} on {2} with {3} {4} {5}.Available balance {6}.
+
+wicode:
+  account-number: 20810287565
+
+transaction:
+  definition:
+    id: 2
+
+callback:
+  env: ${base-url}/api/payment/transaction/status/callback

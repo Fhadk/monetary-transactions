@@ -1,0 +1,149 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+  branches:
+    include:
+      - master
+      - refs/tags/*
+
+resources:
+- repo: self
+
+variables:
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: build  # name of the stage (A-Z, a-z, 0-9, and underscore)
+    displayName: "Build repository"  # friendly name to display in the UI
+    jobs:
+      - job: Maven
+        displayName: "Build repository"
+        continueOnError: false
+        steps:
+          - task: MavenAuthenticate@0
+            inputs:
+              artifactsFeeds: 'LetshegoDigital'
+          - task: Cache@2
+            displayName: "Cache Maven local repo"
+            inputs:
+              key: 'maven | "$(Agent.OS)" | **/pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+                maven
+              path: $(MAVEN_CACHE_FOLDER)
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              mavenOptions: '$(MAVEN_OPTS)'
+              goals: 'compile'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.11'
+              mavenVersionOption: 'Default'
+              mavenAuthenticateFeed: false
+              effectivePomSkip: false
+              sonarQubeRunAnalysis: false
+
+  - stage: quality  # name of the stage (A-Z, a-z, 0-9, and underscore)
+    displayName: "Quality Dashboard"  # friendly name to display in the UI
+    jobs:
+      - job: Test
+        displayName: "Analyze Code Quality"
+        continueOnError: true
+        steps:
+          - task: MavenAuthenticate@0
+            inputs:
+              artifactsFeeds: 'LetshegoDigital'
+          - task: Cache@2
+            displayName: "Cache Maven local repo"
+            inputs:
+              key: 'maven | "$(Agent.OS)" | **/pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+                maven
+              path: $(MAVEN_CACHE_FOLDER)
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              mavenOptions: '$(MAVEN_OPTS)'
+              goals: 'verify'
+              publishJUnitResults: true
+              testResultsFiles: '**/test-results/test/TEST-*.xml'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.11'
+              mavenVersionOption: 'Default'
+              mavenAuthenticateFeed: false
+              effectivePomSkip: false
+              sonarQubeRunAnalysis: false
+
+          - task: SonarCloudPrepare@1
+            inputs:
+              SonarCloud: 'Letshego SonarCloud'
+              organization: 'letshego'
+              scannerMode: 'CLI'
+              configMode: 'file'
+              configFile: 'sonar-project.properties'
+
+          - task: SonarCloudAnalyze@1
+
+          - task: SonarCloudPublish@1
+            inputs:
+              pollingTimeoutSec: '300'
+
+  - stage: deploy  # name of the stage (A-Z, a-z, 0-9, and underscore)
+    displayName: "Push to AWS"  # friendly name to display in the UI
+    jobs:
+      - job: Docker
+        condition: startsWith(variables['build.sourceBranch'], 'refs/tags/')
+        displayName: "Container deployment to AWS"
+        continueOnError: false
+        steps:
+          - script: |
+              export tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+              echo "##vso[task.setvariable variable=tag]$tag"
+              echo Version: $tag
+            displayName: 'Set release tag value'
+            env:
+              TAG: $(tag)
+
+          - task: MavenAuthenticate@0
+            inputs:
+              artifactsFeeds: 'LetshegoDigital'
+
+          - task: Cache@2
+            displayName: "Cache Maven local repo"
+            inputs:
+              key: 'maven | "$(Agent.OS)" | **/pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+                maven
+              path: $(MAVEN_CACHE_FOLDER)
+
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              mavenOptions: '$(MAVEN_OPTS)'
+              goals: 'compile jib:dockerBuild'
+              options: '-DskipTests -Pprod'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.11'
+              mavenVersionOption: 'Default'
+              mavenAuthenticateFeed: false
+              effectivePomSkip: false
+              sonarQubeRunAnalysis: false
+            displayName: 'Building Docker Image'
+
+          - task: ECRPushImage@1
+            inputs:
+              awsCredentials: 'AWS PRD'
+              regionName: 'eu-west-1'
+              imageSource: 'imagename'
+              sourceImageName: 'payment-transactions'
+              repositoryName: 'letshego-micro/payment-transactions'
+              pushTag: '$(tag)'
+            displayName: 'deploy to AWS ECR registry'

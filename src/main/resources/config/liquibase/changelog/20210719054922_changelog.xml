@@ -1,0 +1,32 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+    <changeSet author="shridharchandrasekar (generated)" id="1626673772758-1" failOnError="false">
+        <createSequence incrementBy="50" sequenceName="sequence_generator" startValue="1"/>
+    </changeSet>
+    <changeSet author="shridharchandrasekar (generated)" id="1626673772758-2">
+        <createTable tableName="transaction_details">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="transaction_detailsPK"/>
+            </column>
+            <column name="created_by" type="VARCHAR(50)"/>
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="last_modified_by" type="VARCHAR(50)"/>
+            <column name="last_modified_date" type="TIMESTAMP"/>
+            <column name="amount" type="DECIMAL(19, 2)"/>
+            <column name="to_account_name" type="VARCHAR(100)"/>
+            <column name="to_account_ref_number" type="VARCHAR(100)"/>
+            <column name="to_account_type" type="VARCHAR(100)"/>
+            <column name="message" type="VARCHAR(500)"/>
+            <column name="payment_initiator" type="VARCHAR(100)"/>
+            <column name="from_account_name" type="VARCHAR(100)"/>
+            <column name="from_account_ref_number" type="VARCHAR(100)"/>
+            <column name="from_account_type" type="VARCHAR(100)"/>
+            <column name="status" type="VARCHAR(50)"/>
+            <column name="payment_ref_number" type="VARCHAR(100)"/>
+            <column name="payment_transaction_id" type="VARCHAR(100)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="shridharchandrasekar (generated)" id="1626673772758-3">
+        <addUniqueConstraint columnNames="payment_ref_number" constraintName="UC_TRANSACTION_DETAILSPAYMENT_REF_NUMBER_COL" tableName="transaction_details"/>
+    </changeSet>
+</databaseChangeLog>
